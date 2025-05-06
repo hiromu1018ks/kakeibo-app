@@ -14,7 +14,10 @@
         "laravel/tinker": "^2.10.1"
     },
     "require-dev": {
+        "askdkc/breezejp": "^2.3",
         "fakerphp/faker": "^1.23",
+        "laravel-lang/lang": "^15.20",
+        "laravel/breeze": "^2.3",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.41",
