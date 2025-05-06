@@ -1,0 +1,4 @@
+// テストユーザー
+name:hiromu
+mail:test@example.com
+password:password
