@@ -15,9 +15,18 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // test@example.com のユーザーが存在しない場合のみ作成
+        User::factory()->firstOrCreate(
+            ['email' => 'test@example.com'], // 検索条件
+            [                                 // 見つからなかった場合に作成するデータ
+                'name' => 'Test User',
+                'password' => bcrypt('password'), // パスワードも指定する必要がある場合
+            ]
+        );
+
+
+        $this->call([
+            CategorySeeder::class
         ]);
     }
 }
