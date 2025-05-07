@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -15,7 +16,43 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        //
+        $user = Auth::user();
+
+        $now = Carbon::now();
+        $currentMonthStart = $now->copy()->startOfMonth();
+        $currentMonthEnd = $now->copy()->EndOfMonth();
+
+        $transactions = $user->transactions()
+            ->with('category')
+            ->whereBetween('transaction_date', [$currentMonthStart, $currentMonthEnd])
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        // --- 当月の集計 ---
+        // 当月の収入合計
+        $totalIncome = $user->transactions()
+            ->where('type', 'income')
+            ->whereBetween('transaction_date', [$currentMonthStart, $currentMonthEnd])
+            ->sum('amount');
+
+        // 当月の支出合計
+        $totalExpense = $user->transactions()
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [$currentMonthStart, $currentMonthEnd])
+            ->sum('amount');
+
+        // 当月の収支
+        $balance = $totalIncome - $totalExpense;
+
+        // ビューにデータを渡す
+        return view('transactions.index', [ // resources/views/transactions/index.blade.php を想定
+            'transactions' => $transactions,
+            'totalIncome' => $totalIncome,
+            'totalExpense' => $totalExpense,
+            'balance' => $balance,
+            'currentMonth' => $now->format('Y年n月'), // 例: "2025年5月"
+        ]);
     }
 
     /**
