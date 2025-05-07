@@ -103,7 +103,16 @@ class TransactionController extends Controller
      */
     public function edit(Transaction $transaction)
     {
-        //
+        if ($transaction->user_id !== Auth::id()) {
+            abort(403, 'この取引を編集する権限がありません');
+        }
+
+        $categories = Category::orderBy('type')->orderBy('name')->get();
+
+        return view('transactions.edit', [
+            'transaction' => $transaction,
+            'categories' => $categories,
+        ]);
     }
 
     /**
@@ -111,7 +120,26 @@ class TransactionController extends Controller
      */
     public function update(Request $request, Transaction $transaction)
     {
-        //
+        if ($transaction->user_id !== Auth::id()) {
+            abort(403, 'この取引を更新する権限がありません。');
+        }
+
+        $validated = $request->validate([
+            'transaction_date' => ['required', 'date'],
+            'type' => ['required', Rule::in(['income', 'expense'])],
+            'category_id' => ['required', 'exists:categories,id'],
+            'amount' => ['required', 'numeric', 'min:1'],
+            'description' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $category = Category::find($validated['category_id']);
+        if (!$category || $category->type !== $validated['type']) {
+            return back()->withErrors(['category_id' => '選択された種類とカテゴリの組み合わせが正しくありません。'])->withInput();
+        }
+
+        $transaction->update($validated);
+
+        return redirect()->route('dashboard')->with('success', '取引を更新しました。');
     }
 
     /**
@@ -119,6 +147,15 @@ class TransactionController extends Controller
      */
     public function destroy(Transaction $transaction)
     {
-        //
+        // ポリシーやゲートによる認可チェック (自分自身の取引か確認)
+        if ($transaction->user_id !== Auth::id()) {
+            abort(403, 'この取引を削除する権限がありません。');
+        }
+
+        // 該当の取引データを削除
+        $transaction->delete();
+
+        // 削除後は一覧画面（/dashboard）にリダイレクトし、成功メッセージを表示
+        return redirect()->route('dashboard')->with('success', '取引を削除しました。');
     }
 }
