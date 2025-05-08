@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,20 +14,27 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        // test@example.com のユーザーが存在しない場合のみ作成
-        User::factory()->firstOrCreate(
+        // 開発用のテストユーザーを作成 (ID:1 になる想定)
+        // UserFactory を経由せず、User モデルの firstOrCreate を直接呼び出す
+        User::firstOrCreate(
             ['email' => 'test@example.com'], // 検索条件
             [                                 // 見つからなかった場合に作成するデータ
                 'name' => 'Test User',
-                'password' => bcrypt('password'), // パスワードも指定する必要がある場合
+                // 'password' => bcrypt('password'), // Userモデルに password のミューテタがあれば不要な場合も
+                // UserFactoryのデフォルトパスワード設定に合わせるのが良い
+                // Userモデルに $fillable が設定されているか、または guarded = [] であることを確認
+                // 通常、Breezeを導入していればUserモデルは適切に設定されている
+                // UserFactory を使わないので、パスワードはここでハッシュ化する必要がある
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                // email_verified_at も設定しておくとログイン時に問題が起きにくい
+                'email_verified_at' => now(),
             ]
         );
 
 
         $this->call([
-            CategorySeeder::class
+            CategorySeeder::class,
+            TransactionSeeder::class
         ]);
     }
 }

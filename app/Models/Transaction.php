@@ -56,7 +56,7 @@ class Transaction extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user():BelongsTo
+    public function user(): BelongsTo
     {
         // Userクラスとのリレーションを定義します。
         // 'transactions'テーブルの'user_id'カラム（Laravelの規約により自動的に推測されます）を外部キーとして、
@@ -74,7 +74,7 @@ class Transaction extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function category():BelongsTo
+    public function category(): BelongsTo
     {
         // Categoryクラスとのリレーションを定義します。
         // 'transactions'テーブルの'category_id'カラム（Laravelの規約により自動的に推測されます）を外部キーとして、

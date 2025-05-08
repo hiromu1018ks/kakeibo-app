@@ -1,9 +1,29 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ $currentMonth . __('の家計簿') }}
-            </h2>
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            {{-- 月ナビゲーション --}}
+            <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                <a href="{{ $prevMonthLink }}"
+                   class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    &laquo; {{ __('前月') }}
+                </a>
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                    {{ $currentMonthCarbon->format('Y年n月') }}
+                </h2>
+                <a href="{{ $nextMonthLink }}"
+                   class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    {{ __('翌月') }} &raquo;
+                </a>
+                {{-- 「今月へ」ボタン（現在の表示が今月でない場合のみ表示するなどの工夫も可能） --}}
+                @if(!$currentMonthCarbon->isToday())
+                    {{-- 簡単な例：今日が含まれる月でなければ表示 --}}
+                    <a href="{{ $thisMonthLink }}"
+                       class="ml-4 inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        {{ __('今月へ') }}
+                    </a>
+                @endif
+            </div>
+
             <a href="{{ route('transactions.create') }}"
                class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                 {{ __('項目を追加') }}
@@ -25,7 +45,8 @@
             {{-- 集計情報 --}}
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <h3 class="text-lg font-medium mb-2">{{ $currentMonth . __('の集計') }}</h3>
+                    {{-- 表示している月を集計タイトルにも反映 --}}
+                    <h3 class="text-lg font-medium mb-2">{{ $currentMonthCarbon->format('Y年n月') . __('の集計') }}</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('収入合計') }}</p>
