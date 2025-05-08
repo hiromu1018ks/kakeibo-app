@@ -46,7 +46,7 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     {{-- 表示している月を集計タイトルにも反映 --}}
-                    <h3 class="text-lg font-medium mb-2">{{ $currentMonthCarbon->format('Y年n月') . __('の集計') }}</h3>
+                    <h3 class="text-lg font-medium mb-2 dark:active:bg-gray-100">{{ $currentMonthCarbon->format('Y年n月') . __('の集計') }}</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('収入合計') }}</p>
