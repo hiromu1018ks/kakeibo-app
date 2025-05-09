@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 // Categoryモデルを使用する
@@ -104,6 +105,21 @@ class TransactionController extends Controller
         // 対象月の収支を計算します (総収入 - 総支出)。
         $balance = $totalIncome - $totalExpense;
 
+        // --- ★★★ カテゴリ別支出集計 (JOIN使用版) ここから ★★★ ---
+        $expensesByCategory = $user->transactions() // 現在のユーザーに関連付けられたトランザクション（取引履歴）を取得するためのクエリを開始します。
+        ->join('categories', 'transactions.category_id', '=', 'categories.id') // transactionsテーブルとcategoriesテーブルを結合します。結合キーはtransactionsテーブルのcategory_idとcategoriesテーブルのidです。
+        ->where('transactions.user_id', $user->id) // 抽出対象を現在のユーザーのトランザクションに限定します。JOINによりカラム名が重複する可能性があるため、テーブル名を明示的に指定しています。
+        ->where('transactions.type', 'expense') // トランザクション種別が 'expense'（支出）であるものに限定します。
+        ->whereBetween('transactions.transaction_date', [$currentMonthStart, $currentMonthEnd]) // トランザクションの日付が指定された期間内（当月の開始日から終了日まで）であるものに限定します。
+        ->select(
+            'categories.name as category_name', // categoriesテーブルのnameカラムをcategory_nameという別名で選択します。これがカテゴリ名となります。
+            DB::raw('SUM(transactions.amount) as total_amount') // transactionsテーブルのamountカラムの合計を計算し、total_amountという別名で選択します。DB::raw()は生のSQL式を記述するために使用します。
+        )
+            ->groupBy('categories.id', 'categories.name') // categoriesテーブルのidとnameでグループ化します。これにより、カテゴリごとにamountが集計されます。
+            ->orderBy('total_amount', 'desc') // 集計結果をtotal_amount（合計金額）の降順（多い順）で並び替えます。
+            ->get(); // 上記の条件で構築されたクエリを実行し、結果をコレクションとして取得します。
+        // --- ★★★ カテゴリ別支出集計 (JOIN使用版) ここまで ★★★ ---
+
         // 計算結果や必要なデータをビュー (transactions.index) に渡して表示します。
         return view('transactions.index', [
             'transactions' => $transactions,           // 対象月の取引一覧 (ページネーション済みオブジェクト)
@@ -114,6 +130,7 @@ class TransactionController extends Controller
             'prevMonthLink' => route('dashboard', ['year' => $prevMonthDate->year, 'month' => $prevMonthDate->month]), // 前月へのリンクURLを生成
             'nextMonthLink' => route('dashboard', ['year' => $nextMonthDate->year, 'month' => $nextMonthDate->month]), // 翌月へのリンクURLを生成
             'thisMonthLink' => route('dashboard'),     // 当月 (パラメータなし) へのリンクURLを生成
+            'expensesByCategory' => $expensesByCategory,
         ]);
     }
 
