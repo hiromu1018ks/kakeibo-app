@@ -64,6 +64,27 @@
                 </div>
             </div>
 
+            @if($incomesByCategory->isNotEmpty())
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div class="p-6 text-gray-900 dark:text-gray-100">
+                        <h3 class="text-lg font-medium mb-4 text-gray-900 dark:text-gray-100">
+                            {{ $currentMonthCarbon->format('Y年n月') . __('のカテゴリ別支出') }}
+                        </h3>
+                        <ul class="space-y-2">
+                            @foreach ($incomesByCategory as $income)
+                                <li class="flex justify-between items-center">
+                                    <span class="text-gray-700 dark:text-gray-300">{{ $income->category_name }}</span>
+                                    <span
+                                        class="font-semibold text-green-600 dark:text-green-400">{{ number_format($income->total_amount) . __('円') }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                        {{-- もし総支出に対する割合も表示したい場合、ここで計算して表示も可能 --}}
+                        {{-- 例: ($expense->total_amount / $totalExpense) * 100 --}}
+                    </div>
+                </div>
+            @endif
+
             @if($expensesByCategory->isNotEmpty())
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
